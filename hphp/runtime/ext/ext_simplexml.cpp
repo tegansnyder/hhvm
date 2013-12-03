@@ -1567,7 +1567,7 @@ Array c_SimpleXMLElement::ToArray(const ObjectData* obj) {
   c_SimpleXMLElement *sxe = const_cast<c_SimpleXMLElement*>(
       static_cast<const c_SimpleXMLElement*>(obj));
   Array& properties = sxe->reserveProperties();
-  sxe_get_prop_hash(sxe, false, properties);
+  sxe_get_prop_hash(sxe, true, properties);
   return properties; 
 }
 
