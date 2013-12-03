@@ -643,26 +643,25 @@ static inline String sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list,
 static Variant _get_base_node_value(c_SimpleXMLElement* sxe_ref,
                                     xmlNodePtr node, xmlChar* nsprefix,
                                     bool isprefix) {
-  Object obj = create_object(sxe_ref->o_getClassName(), Array(), false);
-  c_SimpleXMLElement* subnode = obj.getTyped<c_SimpleXMLElement>();
-  subnode->document = sxe_ref->document;
-  if (nsprefix && *nsprefix) {
-    subnode->iter.nsprefix = xmlStrdup((xmlChar*)nsprefix);
-    subnode->iter.isprefix = isprefix;
-  }
-  subnode->node = node;
-  if (node->children && node->children->type == XML_TEXT_NODE &&
-      !xmlIsBlankNode(node->children)) {
+  if (node->children && node->children->type == XML_TEXT_NODE && !xmlIsBlankNode(node->children)) {
     xmlChar* contents = xmlNodeListGetString(node->doc, node->children, 1);
     if (contents) {
-      // This property shouldn't actually be on '0'. 
-      // But there is no support for non-array prop 'list'.
-      // This only impacts var_dump output.
-      subnode->reserveProperties().set(0, String((char*)contents));
+      String obj = String((char*)contents);
       xmlFree(contents);
+      return obj;
     }
+  } else {
+    Object obj = create_object(sxe_ref->o_getClassName(), Array(), false);
+    c_SimpleXMLElement* subnode = obj.getTyped<c_SimpleXMLElement>();
+    subnode->document = sxe_ref->document;
+    if (nsprefix && *nsprefix) {
+      subnode->iter.nsprefix = xmlStrdup((xmlChar*)nsprefix);
+      subnode->iter.isprefix = isprefix;
+    }
+    subnode->node = node;
+    return obj;
   }
-  return obj;
+  return uninit_null();
 }
 
 static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
