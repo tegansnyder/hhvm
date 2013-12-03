@@ -664,6 +664,25 @@ static Variant _get_base_node_value(c_SimpleXMLElement* sxe_ref,
   return uninit_null();
 }
 
+static void sxe_properties_add(Array& rv, char* name, CVarRef value) {
+  String sName = String(name);
+  if (rv.exists(sName)) {
+    Variant existVal = rv[sName];
+    if (existVal.isArray()) {
+      Array arr = existVal.toArray();
+      arr.append(value);
+      rv.set(sName, arr);
+    } else {
+      Array arr = Array::Create();
+      arr.append(existVal);
+      arr.append(value);
+      rv.set(sName, arr);
+    }
+  } else {
+    rv.set(sName, value);
+  }
+}
+
 static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
                               Array& rv) {
   rv.clear();
@@ -752,7 +771,7 @@ static void sxe_get_prop_hash(c_SimpleXMLElement* sxe, bool is_debug,
       if (use_iter) {
         rv.append(value);
       } else {
-        rv.set(String(name), value);
+        sxe_properties_add(rv, name, value);
       }
 next_iter:
       if (use_iter) {
